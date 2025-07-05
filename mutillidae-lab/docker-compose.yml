@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  mutillidae:
+    build: ./mutillidae
+    ports:
+      - "80:80"
+
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+
+  mitmproxy:
+    build: ./mitmproxy
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mutillidae
+
+  flask_waf:
+    build: ./flask_waf
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mutillidae
+
+  rate_limit:
+    build: ./rate_limit
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mutillidae
+      - redis
